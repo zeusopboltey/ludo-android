@@ -4,21 +4,16 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.ankeet.ludogame.model.Dice
-import com.ankeet.ludogame.model.Player
-import com.ankeet.ludogame.model.PlayerColor
+import com.ankeet.ludogame.model.*
 
 class MainActivity : AppCompatActivity() {
 
-    // Core game objects
     private lateinit var dice: Dice
 
-    // UI elements
     private lateinit var tvDiceValue: TextView
     private lateinit var tvCurrentPlayer: TextView
     private lateinit var btnRollDice: Button
 
-    // Players with tokens
     private val players = listOf(
         Player(PlayerColor.RED),
         Player(PlayerColor.BLUE),
@@ -28,57 +23,109 @@ class MainActivity : AppCompatActivity() {
 
     private var currentPlayerIndex = 0
 
-    // Tracks extra turn earned by rolling 6
-    private var hasExtraTurn = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize dice
         dice = Dice()
 
-        // Bind UI
         tvDiceValue = findViewById(R.id.tvDiceValue)
         tvCurrentPlayer = findViewById(R.id.tvCurrentPlayer)
         btnRollDice = findViewById(R.id.btnRollDice)
 
-        // Initial UI state
-        updateCurrentPlayerUI()
         tvDiceValue.text = "Dice: -"
+        updateCurrentPlayerUI()
 
-        // (Optional debug log)
-        players.forEach { player ->
-            println("${player.color} has ${player.tokens.size} tokens")
+        btnRollDice.setOnClickListener {
+            handleDiceRoll()
+        }
+    }
+
+    private fun handleDiceRoll() {
+        val value = dice.roll()
+        tvDiceValue.text = "Dice: $value"
+
+        val player = players[currentPlayerIndex]
+
+        if (value == 6) {
+            handleSix(player)
+            // same player continues
+        } else {
+            moveActiveToken(player, value)
+            moveToNextPlayer()
+        }
+    }
+
+    // 🎲 Dice = 6 logic
+    private fun handleSix(player: Player) {
+        val homeToken = player.tokens.firstOrNull {
+            it.state == TokenState.HOME
         }
 
-        // Dice roll logic
-        btnRollDice.setOnClickListener {
-            val value = dice.roll()
-            tvDiceValue.text = "Dice: $value"
+        if (homeToken != null) {
+            homeToken.state = TokenState.ACTIVE
+            homeToken.position =
+                BoardPath.entryIndexByColor[player.color]!!
+            homeToken.stepsMoved = 0
 
-            if (value == 6) {
-                // Player earns extra turn
-                hasExtraTurn = true
-            } else {
-                if (hasExtraTurn) {
-                    // Extra turn consumed, stay on same player
-                    hasExtraTurn = false
-                } else {
-                    // Normal turn ends
-                    moveToNextPlayer()
-                }
+            println(
+                "Token ${homeToken.id} of ${player.color} entered board at ${homeToken.position}"
+            )
+        } else {
+            moveActiveToken(player, 6)
+        }
+    }
+
+    // 🚶 Move ACTIVE token
+    private fun moveActiveToken(player: Player, steps: Int) {
+        val token = player.tokens.firstOrNull {
+            it.state == TokenState.ACTIVE
+        }
+
+        if (token != null) {
+
+            // Prevent overshoot beyond finish
+            if (token.stepsMoved + steps > BoardPath.TOTAL_MAIN_PATH) {
+                println("Move exceeds board limit for ${player.color}")
+                return
             }
+
+            val oldPos = token.position
+
+            token.stepsMoved += steps
+            token.position =
+                BoardPath.nextPosition(token.position, steps)
+
+            println(
+                "Token ${token.id} of ${player.color} moved from $oldPos to ${token.position} " +
+                        "(steps=${token.stepsMoved})"
+            )
+
+            // 🏁 Finish condition
+            val homeEntry =
+                BoardPath.homeStartIndexByColor[player.color]!!
+
+            if (token.position == homeEntry &&
+                token.stepsMoved == BoardPath.TOTAL_MAIN_PATH
+            ) {
+                token.state = TokenState.FINISHED
+                println("🎉 Token ${token.id} of ${player.color} FINISHED")
+            }
+
+        } else {
+            println("No ACTIVE token to move for ${player.color}")
         }
     }
 
     private fun moveToNextPlayer() {
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size
+        currentPlayerIndex =
+            (currentPlayerIndex + 1) % players.size
         updateCurrentPlayerUI()
     }
 
     private fun updateCurrentPlayerUI() {
         val player = players[currentPlayerIndex]
-        tvCurrentPlayer.text = "Current Player: ${player.color}"
+        tvCurrentPlayer.text =
+            "Current Player: ${player.color}"
     }
 }
