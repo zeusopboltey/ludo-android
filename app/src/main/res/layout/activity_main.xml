@@ -82,6 +82,41 @@
             android:layout_columnWeight="1"
             android:background="#FBC02D" />
 
-    </GridLayout>
+    </GridLayout>    <!-- Dice Value Display -->
+    <!-- Current Player Display -->
+    <TextView
+        android:id="@+id/tvCurrentPlayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Current Player: RED"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tvDiceValue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="16dp"/>
+    <TextView
+        android:id="@+id/tvDiceValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dice: -"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/ludoBoard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
+
+    <!-- Roll Dice Button -->
+    <Button
+        android:id="@+id/btnRollDice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Roll Dice 🎲"
+        app:layout_constraintTop_toBottomOf="@id/tvDiceValue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
