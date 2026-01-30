@@ -3,6 +3,7 @@ package com.ankeet.ludogame
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.ankeet.ludogame.model.*
 
@@ -22,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     )
 
     private var currentPlayerIndex = 0
+    private var gameOver = false   // 🛑 important
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +39,9 @@ class MainActivity : AppCompatActivity() {
         updateCurrentPlayerUI()
 
         btnRollDice.setOnClickListener {
-            handleDiceRoll()
+            if (!gameOver) {
+                handleDiceRoll()
+            }
         }
     }
 
@@ -49,9 +53,11 @@ class MainActivity : AppCompatActivity() {
 
         if (value == 6) {
             handleSix(player)
+            checkWinner(player)
             // same player continues
         } else {
             moveActiveToken(player, value)
+            checkWinner(player)
             moveToNextPlayer()
         }
     }
@@ -68,9 +74,7 @@ class MainActivity : AppCompatActivity() {
                 BoardPath.entryIndexByColor[player.color]!!
             homeToken.stepsMoved = 0
 
-            println(
-                "Token ${homeToken.id} of ${player.color} entered board at ${homeToken.position}"
-            )
+            println("Token ${homeToken.id} of ${player.color} entered board")
         } else {
             moveActiveToken(player, 6)
         }
@@ -84,7 +88,6 @@ class MainActivity : AppCompatActivity() {
 
         if (token != null) {
 
-            // Prevent overshoot beyond finish
             if (token.stepsMoved + steps > BoardPath.TOTAL_MAIN_PATH) {
                 println("Move exceeds board limit for ${player.color}")
                 return
@@ -97,11 +100,9 @@ class MainActivity : AppCompatActivity() {
                 BoardPath.nextPosition(token.position, steps)
 
             println(
-                "Token ${token.id} of ${player.color} moved from $oldPos to ${token.position} " +
-                        "(steps=${token.stepsMoved})"
+                "Token ${token.id} of ${player.color} moved from $oldPos to ${token.position}"
             )
 
-            // 🏁 Finish condition
             val homeEntry =
                 BoardPath.homeStartIndexByColor[player.color]!!
 
@@ -115,6 +116,27 @@ class MainActivity : AppCompatActivity() {
         } else {
             println("No ACTIVE token to move for ${player.color}")
         }
+    }
+
+    // 🏆 WINNER CHECK
+    private fun checkWinner(player: Player) {
+        val finishedCount =
+            player.tokens.count { it.state == TokenState.FINISHED }
+
+        if (finishedCount == 4) {
+            gameOver = true
+            showWinnerDialog(player.color)
+        }
+    }
+
+    // 🏁 Winner Dialog
+    private fun showWinnerDialog(color: PlayerColor) {
+        AlertDialog.Builder(this)
+            .setTitle("Game Over 🎉")
+            .setMessage("$color wins the game!")
+            .setCancelable(false)
+            .setPositiveButton("OK") { _, _ -> }
+            .show()
     }
 
     private fun moveToNextPlayer() {
