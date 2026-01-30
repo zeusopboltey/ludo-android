@@ -3,8 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#ECECEC">
+    android:layout_height="match_parent">
 
     <GridLayout
         android:id="@+id/ludoBoard"
@@ -15,9 +14,9 @@
         android:background="#000000"
         android:padding="2dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp">
 
         <FrameLayout
             android:layout_width="0dp"
@@ -82,8 +81,8 @@
             android:layout_columnWeight="1"
             android:background="#FBC02D" />
 
-    </GridLayout>    <!-- Dice Value Display -->
-    <!-- Current Player Display -->
+    </GridLayout>
+
     <TextView
         android:id="@+id/tvCurrentPlayer"
         android:layout_width="wrap_content"
@@ -91,10 +90,11 @@
         android:text="Current Player: RED"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/tvDiceValue"
+        app:layout_constraintTop_toBottomOf="@id/ludoBoard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginTop="24dp" />
+
     <TextView
         android:id="@+id/tvDiceValue"
         android:layout_width="wrap_content"
@@ -102,12 +102,11 @@
         android:text="Dice: -"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/ludoBoard"
+        app:layout_constraintTop_toBottomOf="@id/tvCurrentPlayer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="16dp" />
 
-    <!-- Roll Dice Button -->
     <Button
         android:id="@+id/btnRollDice"
         android:layout_width="wrap_content"
@@ -116,7 +115,6 @@
         app:layout_constraintTop_toBottomOf="@id/tvDiceValue"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
-
+        android:layout_marginTop="16dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

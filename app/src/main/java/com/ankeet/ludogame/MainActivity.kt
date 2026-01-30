@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     )
 
     private var currentPlayerIndex = 0
+    private var hasExtraTurn = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +39,16 @@ class MainActivity : AppCompatActivity() {
         btnRollDice.setOnClickListener {
             val value = dice.roll()
             tvDiceValue.text = "Dice: $value"
-            moveToNextPlayer()
+
+            if (value == 6) {
+                hasExtraTurn = true
+            } else {
+                if (hasExtraTurn) {
+                    hasExtraTurn = false
+                } else {
+                    moveToNextPlayer()
+                }
+            }
         }
     }
 
